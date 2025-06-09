@@ -8,8 +8,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-//ADD YOUR API KEY HERE
-string youtubeApiKey = "";
+string apiKey = "";
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
     size_t totalSize = size * nmemb;
@@ -51,7 +50,7 @@ void searchYouTube(const string& query) {
     string encodedQuery = query;
     for (char& ch : encodedQuery) if (ch == ' ') ch = '+';
 
-    string apiURL = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=" + encodedQuery + "&key=" + youtubeApiKey;
+    string apiURL = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q=" + encodedQuery + "&key=" + apiKey;
     string result = makeRequest(apiURL);
 
     json data = json::parse(result, nullptr, false);
@@ -99,69 +98,9 @@ void searchGoogle(const string& query) {
     openInBrowser(url);
 }
 
-void calculate(const string& expression) {
-    try {
-        vector<double> numbers;
-        vector<char> operators;
-        string currentNum;
-        
-        for (char c : expression) {
-            if (isdigit(c) || c == '.') {
-                currentNum += c;
-            } else if (c != ' ') {
-                if (!currentNum.empty()) {
-                    numbers.push_back(stod(currentNum));
-                    currentNum.clear();
-                }
-                operators.push_back(c);
-            }
-        }
-        if (!currentNum.empty()) {
-            numbers.push_back(stod(currentNum));
-        }
-        
-        if (numbers.empty()) {
-            cout << "Error: Invalid expression\n";
-            return;
-        }
-        
-        for (size_t i = 0; i < operators.size(); i++) {
-            if (operators[i] == '*' || operators[i] == '/') {
-                double result;
-                if (operators[i] == '*') {
-                    result = numbers[i] * numbers[i + 1];
-                } else {
-                    if (numbers[i + 1] == 0) {
-                        cout << "Error: Division by zero\n";
-                        return;
-                    }
-                    result = numbers[i] / numbers[i + 1];
-                }
-                numbers[i] = result;
-                numbers.erase(numbers.begin() + i + 1);
-                operators.erase(operators.begin() + i);
-                i--;
-            }
-        }
-        
-        double finalResult = numbers[0];
-        for (size_t i = 0; i < operators.size(); i++) {
-            if (operators[i] == '+') {
-                finalResult += numbers[i + 1];
-            } else if (operators[i] == '-') {
-                finalResult -= numbers[i + 1];
-            }
-        }
-        
-        cout << "Result: " << finalResult << endl;
-    } catch (const exception& e) {
-        cout << "Error: Invalid expression\n";
-    }
-}
-
 int main(int argc, char* argv[]) {
     if (argc < 3) {
-        cout << "Usage: ./exe -yt <search term> or ./exe -gg <search term> or ./exe -calc <expression>\n";
+        cout << "Usage: SQ -yt <search term> or SQ -gg <search term>\n";
         return 1;
     }
 
@@ -176,10 +115,8 @@ int main(int argc, char* argv[]) {
         searchYouTube(query);
     } else if (flag == "-gg") {
         searchGoogle(query);
-    } else if (flag == "-calc") {
-        calculate(query);
     } else {
-        cout << "Unknown flag. Use -yt for YouTube, -gg for Google search, or -calc for calculations.\n";
+        cout << "Unknown flag. Use -yt for YouTube or -gg for Google search.\n";
     }
 
     return 0;
